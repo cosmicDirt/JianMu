@@ -100,6 +100,7 @@
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-info mb-2">排序</button>
+                <a target="_blank"  href="@routes.HomeController.visual("")">轨迹分类可视化</a>
             </div>
         </div>
     }
@@ -112,6 +113,7 @@
                 <th>上传时间</th> <th>文件大小</th>
                 <th>预览</th>
                 <th>下载</th>
+                <th>轨迹</th>
             </tr>
         </thead>
         <tbody>
@@ -122,6 +124,7 @@
                     <th>@ds.getUploadDate</th> <th>@ds.getReadableFileSize</th>
                     <th><a target="_blank" href="@routes.HomeController.viewDataset(ds.getName, java.lang.Boolean.TRUE, cSort, cAscending)">&#10140;</a></th>
                     <th><a href="@routes.HomeController.viewDataset(ds.getName, java.lang.Boolean.FALSE, cSort, cAscending)">&#10515;</a></th>
+                    <th><a target="_blank" href="@routes.HomeController.trajectory(ds.getName)">&#10140;</a></th>
                 </tr>
             }
         </tbody>

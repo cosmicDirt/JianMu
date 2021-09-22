@@ -4,8 +4,12 @@ import com.google.common.collect.ImmutableSet;
 import com.typesafe.config.Config;
 import dto.DatasetDescription;
 import lombok.extern.slf4j.Slf4j;
+import play.api.libs.json.JsObject;
+import play.libs.Json;
 import play.libs.exception.ExceptionUtils;
 import play.mvc.Http;
+import scala.util.parsing.json.JSONObject;
+import scala.util.parsing.json.JSONObject$;
 import services.DatasetService;
 
 import javax.inject.Inject;
@@ -141,6 +145,66 @@ public class DatasetServiceImpl implements DatasetService {
         return config.getString("upload-dataset.token");
     }
 
+    @Override
+    public String getAllTrajectoryByMode() throws IOException {
+        Path uploadDir = getUploadDirectory();
+        List<Map<String, String>> allTrajectory = new ArrayList<>();
+        try (Stream<Path> paths = Files.walk(Paths.get(uploadDir.toString()))) {
+            paths.filter(Files::isRegularFile)
+                    .forEach(text -> {
+                        try {
+                            List<String> lines = Files.readAllLines(text);
+                            String mode = "";
+                            List<List<Double>> coordinates = new ArrayList<>();
+                            Map<String, String> result = new HashMap<>();
+                            for (int i = 8; i < lines.size(); i++) {
+                                String[] mrs = lines.get(i).split(",");
+                                double lon = Double.parseDouble(mrs[2]);
+                                double lat = Double.parseDouble(mrs[3]);
+                                //与上条MR运动模式相同，继续记录轨迹
+                                if (mode.equals(mrs[1]) || mode.equals("")) {
+                                    mode = mrs[1];
+                                    if (lon > 0.00001 && lat > 0.00001)
+                                        coordinates.add(Arrays.asList(lon, lat));
+                                }
+                                //不同则保存轨迹后重新记录
+                                else {
+                                    result.put(mode, coordinates.toString());
+                                    mode = mrs[1];
+                                    coordinates.clear();
+                                    if (lon > 0.00001 && lat > 0.00001)
+                                        coordinates.add(Arrays.asList(lon, lat));
+                                }
+                            }
+                            result.put(mode, coordinates.toString());
+                            allTrajectory.add(result);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
+
+        return allTrajectory.toString().replace("=", ":");
+    }
+
+    ;
+
+    @Override
+    public String getTrajectory(String datasetName) throws IOException {
+        Path path = getDatasetPath(datasetName);
+        List<String> lines = Files.readAllLines(path);
+        List<List<Double>> coordinates = new ArrayList<>();
+        for (int i = 8; i < lines.size(); i++) {
+            String[] mrs = lines.get(i).split(",");
+            double lon = Double.parseDouble(mrs[2]);
+            double lat = Double.parseDouble(mrs[3]);
+            if (lon > 0.00001 && lat > 0.00001)
+                coordinates.add(Arrays.asList(lon, lat));
+        }
+        return coordinates.toString();
+    }
+
+    ;
 
     /* private methods */
 

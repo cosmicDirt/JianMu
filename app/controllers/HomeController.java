@@ -20,6 +20,7 @@ import services.DatasetService;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -197,5 +198,25 @@ public class HomeController extends Controller {
             return redirect(routes.HomeController.index(sort, ascending))
                     .flashing("alert alert-warning", "服务器错误!");
         }
+    }
+
+    /**
+     * 轨迹可视化
+     *
+     * @param name      数据文件的全名
+     */
+    public Result trajectory(String name) throws IOException {
+        String trajectory=datasetService.getTrajectory(name);
+        return ok(views.html.trajectory.render(trajectory));
+    }
+
+    /**
+     * 所有轨迹分类可视化
+     *
+     * @param name      数据文件的全名
+     */
+    public Result visual(String name) throws IOException {
+        String allTrajectory = datasetService.getAllTrajectoryByMode();
+        return ok(views.html.visual.render(allTrajectory));
     }
 }

@@ -63,4 +63,19 @@ public interface DatasetService {
      * @return
      */
     String getToken();
+
+    /**
+     * 获得所有不同模式的轨迹数据
+     *
+     * @return geojson
+     */
+    String getAllTrajectoryByMode() throws IOException;
+
+    /**
+     * 根据数据集名字获取一个数据文件的路径
+     *
+     * @param datasetName 数据集名
+     * @return 该数据集的路径
+     */
+    String getTrajectory(String datasetName) throws IOException;
 }
